@@ -99,7 +99,14 @@ jobs:
           cp rules/rules.* "$PACK_DIR/rules"
           cp rules/rule-set-policy.md "$PACK_DIR/rules"
           cp README.md "$PACK_DIR"
-          cp "$DIST_DIR/$BIN_NAME" "$PACK_DIR/"
+
+          # Binary korrekt kopieren
+          if [[ -f "$DIST_DIR/$BIN_NAME" ]]; then
+            cp "$DIST_DIR/$BIN_NAME" "$PACK_DIR/"
+          else
+            echo "ERROR: Binary $DIST_DIR/$BIN_NAME not found!"
+            exit 1
+          fi
 
           ZIP_NAME="autumo-Sentinel-${VERSION}"
           case "${{ matrix.os }}" in
@@ -109,7 +116,8 @@ jobs:
           esac
 
           ZIP_PATH="${DIST_DIR}/${ZIP_NAME}.zip"
-          mkdir -p "${DIST_DIR}"        # <-- sicherstellen, dass dist existiert
+          mkdir -p "${DIST_DIR}"  # sicherstellen, dass dist existiert
+
           cd "$PACK_DIR"
           zip -r "$ZIP_PATH" . -x "*/.DS_Store" -x "*/__MACOSX"
           cd ../..
