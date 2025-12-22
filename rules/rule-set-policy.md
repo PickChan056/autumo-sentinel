@@ -12,7 +12,7 @@ autumo Sentinel is released under **dual licensing**:
 - **Rules Included:** Medium & High severity rules
 - **Purpose:** Authorized users get production-ready heuristics for CI/CD, enterprise, or security teams.
 - **Note:** Commercial rules are **not included** in the public repository to protect proprietary heuristics.
-- **Contact / Ordering:** info@autumo.com or https://autumo.com
+- **Contact / Ordering:** https://autumo.ch
 
 ### Low Severity Rules (Community)
 

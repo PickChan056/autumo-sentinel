@@ -267,7 +267,7 @@ autumo Sentinel is **dual-licensed**, with separate Open Source and Commercial e
 | Edition                | License                              | Includes                                                                                       | Not included / Notes                                                                                  |
 |------------------------|-------------------------------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | Open Source Edition    | GPLv3                                | Core engine, Rule framework, Low-Severity Rules (example rules), Documentation for custom rules | Medium & High-Severity Rules, Production-ready rulesets, Advanced correlation packs                 |
-| Commercial Edition     | autumo Products General License v1.1 | Medium & High Severity Rules, Advanced heuristic combinations, Loader/Privilege/Persistence/Network+Exec rules, Advanced correlation packs, Rule updates, Optional support & integration | Suitable for CI/CD, enterprise, or security teams; Contact: [https://www.autumo.ch](https://www.autumo.ch) / info@autumo.com |
+| Commercial Edition     | autumo Products General License v1.1 | Medium & High Severity Rules, Advanced heuristic combinations, Loader/Privilege/Persistence/Network+Exec rules, Advanced correlation packs, Rule updates, Optional support & integration | Suitable for CI/CD, enterprise, or security teams; Contact: [https://autumo.ch](https://autumo.ch) |
 
 ### When a Commercial License is Required
 
