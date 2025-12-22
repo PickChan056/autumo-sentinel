@@ -12,7 +12,6 @@ Used to flag unusually long strings or encoded payloads.
 | `min_length` | integer | Minimum line length required before the rule can trigger |
 
 - **Scope:** line
-- String length checks
 
 ### base64 Payload Detection `base64_suspect`
 
