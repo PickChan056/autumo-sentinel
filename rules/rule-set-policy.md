@@ -36,8 +36,6 @@ Medium severity rules focus on multi-step suspicious behavior, including:
 - environment and loader manipulation
 - network-assisted execution chains
 
-These rules are **not included in the public repository**.
-
 ### High Severity Rules (Commercial Version)
 
 High severity rules detect high-confidence malicious behavior, such as:
@@ -46,4 +44,5 @@ High severity rules detect high-confidence malicious behavior, such as:
 - dynamic loader and runtime manipulation
 - immediate execution of decoded payloads
 
-Exact rule definitions are part of the **commercial edition only**.
+---
+&copy; 2025 autumo GmbH

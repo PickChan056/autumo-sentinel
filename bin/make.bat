@@ -96,7 +96,7 @@ REM Copy app files
 xcopy /E /I /Y config "%DIST_DIR%\%PACK_DIR%" >nul
 xcopy /E /I /Y patterns "%DIST_DIR%\%PACK_DIR%" >nul
 xcopy /Y rules\rules.low* "%DIST_DIR%\%PACK_DIR%\rules\" >nul
-xcopy /Y rules\rule-set-policy.md "%DIST_DIR%\%PACK_DIR%\rules\" >nul
+xcopy /Y rules\rule-* "%DIST_DIR%\%PACK_DIR%\rules\" >nul
 xcopy /Y README.md "%DIST_DIR%\%PACK_DIR%" >nul
 copy /Y "%DIST_DIR%\%BIN_NAME%.exe" "%DIST_DIR%\%PACK_DIR%\" >nul
 copy /Y LICENSE "%DIST_DIR%\%PACK_DIR%\" >nul

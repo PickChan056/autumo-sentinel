@@ -70,30 +70,14 @@ jobs:
         run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch x86_64 --distpath ${{ env.DIST_DIR }} app/${{ env.BIN_NAME }}.py
         shell: bash
 
-      # --------- Package ZIP ---------
-      - name: Prepare Artifact Contents (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          New-Item -ItemType Directory -Force -Path "${{ env.DIST_DIR }}\rules" | Out-Null
-          Copy-Item -Recurse -Force config "${{ env.DIST_DIR }}"
-          Copy-Item -Recurse -Force patterns "${{ env.DIST_DIR }}"
-          Copy-Item -Force rules\rules.low* "${{ env.DIST_DIR }}\rules"
-          Copy-Item -Force rules\rule-set-policy.md "${{ env.DIST_DIR }}\rules"
-          Copy-Item -Force README.md "${{ env.DIST_DIR }}"
-          Copy-Item -Force LICENSE "${{ env.DIST_DIR }}"
-
-          $ZIP_BASENAME = "autumo-Sentinel-${{ env.VERSION }}-windows-x64"
-          "ZIP_BASENAME=$ZIP_BASENAME" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        shell: pwsh
-
-      - name: Prepare Artifact Contents (macOS/Linux)
-        if: matrix.os != 'windows-latest'
+      # --------- Prepare Artifact Contents ---------
+      - name: Prepare Artifact Contents
         run: |
           mkdir -p "${{ env.DIST_DIR }}/rules"
           cp -r config "${{ env.DIST_DIR }}"
           cp -r patterns "${{ env.DIST_DIR }}"
           cp rules/rules.low* "${{ env.DIST_DIR }}/rules"
-          cp rules/rule-set-policy.md "${{ env.DIST_DIR }}/rules"
+          cp rules/rule-*.md "${{ env.DIST_DIR }}/rules"
           cp README.md "${{ env.DIST_DIR }}"
           cp LICENSE "${{ env.DIST_DIR }}"
 
@@ -102,6 +86,7 @@ jobs:
             macos-15-intel)  ZIP_BASENAME="$ZIP_BASENAME-macos-x64" ;;
             macos-latest)    ZIP_BASENAME="$ZIP_BASENAME-macos-arm64" ;;
             ubuntu-latest)   ZIP_BASENAME="$ZIP_BASENAME-linux-x64" ;;
+            windows-latest)  ZIP_BASENAME="$ZIP_BASENAME--windows-x64" ;;
           esac
           echo "ZIP_BASENAME=$ZIP_BASENAME" >> $GITHUB_ENV
         shell: bash

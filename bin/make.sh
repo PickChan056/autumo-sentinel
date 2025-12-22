@@ -132,7 +132,7 @@ cp "$DIST_DIR/$BIN_NAME" "$DIST_DIR/$PACK_DIR"
 cp -r config "$DIST_DIR/$PACK_DIR"
 cp -r patterns "$DIST_DIR/$PACK_DIR"
 cp rules/rules.low* "$DIST_DIR/$PACK_DIR/rules"
-cp rules/rule-set-policy.md "$DIST_DIR/$PACK_DIR/rules"
+cp rules/rule-* "$DIST_DIR/$PACK_DIR/rules"
 cp README.md "$DIST_DIR/$PACK_DIR"
 cp LICENSE "$DIST_DIR/$PACK_DIR"
 # Copy commercial files if requested

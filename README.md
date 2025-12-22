@@ -82,17 +82,17 @@ Detection is progressive, with each stage building on the previous one:
 
 | Scope | Types | Description |
 |-------|-------|-------------|
-| line-scoped | `keyword_combination`, `base64_suspect`, `hex_suspect`, `string_length`, `path_access` | Evaluates individual lines for suspicious keyword combinations, payloads, or sequences. |
-| file-scoped | `keyword_combination`, `obfuscation_vars`, `obfuscation_strings` | Evaluates entire files for structural obfuscation, string concatenation, suspicious variable patterns, and combinations. |
+| line-scoped | `keyword_combination`, `base64_suspect`, `hex_suspect`, `string_length`, `path_access`, `obfuscation_strings` | Evaluates individual lines for suspicious keyword combinations, payloads, or sequences. |
+| file-scoped | `keyword_combination`, `obfuscation_strings`, `obfuscation_vars` | Evaluates entire files for structural obfuscation, string concatenation, suspicious variable patterns, and combinations. |
 
-**Note**: Check the [heuristic engine source code](app/heuristics.py) to see what parameters each type accepts.
-
-> **Heuristic threshold**: Rules are applied in order, and the heuristic threshold determines how many indicators must match before the rule triggers. Thresholds apply only to line-scoped rules.
+**Note:** Check the [heuristic engine source code](app/heuristics.py) to see what parameters each type accepts.
 
 > **Rule definitions and examples:**  
 > The public repository includes a limited set of low‑severity heuristic rules for demonstration purposes.  
 > For details on rule structure, evaluation order, and the public rule policy, see  
 > **[Rule Set Policy](rules/rule-set-policy.md)**.
+
+> **Heuristic threshold**: Rules are applied in order, and the heuristic threshold determines how many indicators must match before the rule triggers. Thresholds apply only to line-scoped rules.
 
 #### Rule Evaluation Order
 
@@ -149,7 +149,10 @@ Example Rule:
 }
 ```
 
-> Note: `applies_to.extensions` can be omitted. If not specified, the rule will apply by default only to the file types listed under `artifacts.extensions` and `artifacts.content_files` in `config/config.json`.
+> **Rule parametrization:**  
+> Detailed descriptions of supported parameters, default values, and examples can be found in **[Rule Parameters](rules/rule-parameters.md)**.
+
+> **Note:** `applies_to.extensions` can be omitted. If not specified, the rule will apply by default only to the file types listed under `artifacts.extensions` and `artifacts.content_files` in `config/config.json`.
 
 ## CLI Usage
 
@@ -273,3 +276,6 @@ A commercial license is required if you:
 - Use Medium or High severity rules
 - Integrate Sentinel into proprietary software
 - Provide Sentinel as a service
+
+---
+&copy; 2025 autumo GmbH

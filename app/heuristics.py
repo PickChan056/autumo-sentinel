@@ -365,7 +365,7 @@ class HeuristicEngine:
     #
     # Example:
     # ----------
-    # Rule keywords: [["eval", "exec"], ["base64"], {"regex": "obf_[a-z]+"}]
+    # Rule keywords: [["eval", "exec"], ["base64"], [{"regex": "obf_[a-z]+"}]]
     # Line: "eval(base64_decode(obf_xyz('data')))"
     # Matching process:
     #   - Group 1: "eval" matches → ✅
