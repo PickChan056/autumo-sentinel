@@ -37,7 +37,7 @@ Medium severity rules focus on multi-step suspicious behavior, including:
 - environment and loader manipulation
 - network-assisted execution chains
 
-> Version 1.0 of the ruleset contains **21** rules classified as medium severity.
+> Version 1.0 of the ruleset contains **21** rules classified as **medium** severity.
 
 ### High Severity Rules (Commercial Version)
 
@@ -48,7 +48,7 @@ High severity rules detect high-confidence malicious behavior, such as:
 - dynamic loader and runtime manipulation
 - immediate execution of decoded payloads
 
-> Version 1.0 of the ruleset contains **30** rules classified as medium severity.
+> Version 1.0 of the ruleset contains **30** rules classified as **high** severity.
 
 ---
 &copy; 2025 autumo GmbH
