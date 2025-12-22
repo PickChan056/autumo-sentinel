@@ -33,14 +33,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --------- Setup Python for macOS & Linux ---------
-      - name: Setup Python 3.12
+      # --------- Setup Python ---------
+      - name: Setup Python 3.12 (macOS/Linux)
         if: runner.os != 'Windows'
         uses: actions/setup-python@v4
         with:
           python-version: 3.12.0
 
-      - name: Check Python
+      - name: Check Python (macOS/Linux)
         if: runner.os != 'Windows'
         run: python --version
 
@@ -60,23 +60,42 @@ jobs:
         shell: bash
 
       # --------- Build sentinel CLI ---------
-      - name: Build sentinel CLI (Windows)
+      - name: Build CLI (Windows)
         if: matrix.os == 'windows-latest'
         run: pyinstaller --name ${{ env.BIN_NAME }} --onefile app/sentinel.py
         shell: pwsh
 
-      - name: Build sentinel CLI (macOS ARM)
+      - name: Build CLI (macOS ARM)
         if: matrix.os == 'macos-latest'
         run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch arm64 app/sentinel.py
         shell: bash
 
-      - name: Build sentinel CLI (macOS Intel / Linux)
+      - name: Build CLI (macOS Intel / Linux)
         if: matrix.os != 'windows-latest' && matrix.os != 'macos-latest'
         run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch x86_64 app/sentinel.py
         shell: bash
 
-      # --------- Package files into ZIP ---------
-      - name: Package files into ZIP
+      # --------- Package ZIP (Windows) ---------
+      - name: Package ZIP (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:DIST_DIR\pack\rules" | Out-Null
+          Copy-Item -Recurse -Force config "$env:DIST_DIR\pack"
+          Copy-Item -Recurse -Force patterns "$env:DIST_DIR\pack"
+          Copy-Item -Force rules\rules.* "$env:DIST_DIR\pack\rules"
+          Copy-Item -Force rules\rule-set-policy.md "$env:DIST_DIR\pack\rules"
+          Copy-Item -Force README.md "$env:DIST_DIR\pack"
+          Copy-Item -Force "$env:DIST_DIR\$env:BIN_NAME.exe" "$env:DIST_DIR\pack\"
+          
+          $ZIP_NAME="autumo-Sentinel-$env:VERSION-windows-x64"
+          Compress-Archive -Path "$env:DIST_DIR\pack\*" -DestinationPath "$env:DIST_DIR\$ZIP_NAME.zip" -Force
+          Remove-Item -Recurse -Force "$env:DIST_DIR\pack"
+          echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      # --------- Package ZIP (macOS/Linux) ---------
+      - name: Package ZIP (macOS/Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           mkdir -p ${{ env.DIST_DIR }}/pack/rules
           cp -r config ${{ env.DIST_DIR }}/pack
@@ -85,29 +104,19 @@ jobs:
           cp rules/rule-set-policy.md ${{ env.DIST_DIR }}/pack/rules
           cp README.md ${{ env.DIST_DIR }}/pack
 
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            cp ${{ env.DIST_DIR }}\${{ env.BIN_NAME }}.exe ${{ env.DIST_DIR }}/pack/
-          else
-            cp ${{ env.DIST_DIR }}/${{ env.BIN_NAME }} ${{ env.DIST_DIR }}/pack/
-          fi
+          cp ${{ env.DIST_DIR }}/${{ env.BIN_NAME }} ${{ env.DIST_DIR }}/pack/
 
           ZIP_NAME="autumo-Sentinel-${{ env.VERSION }}"
           case "${{ matrix.os }}" in
             macos-15-intel) ZIP_NAME="$ZIP_NAME-macos-x64" ;;
             macos-latest)    ZIP_NAME="$ZIP_NAME-macos-arm64" ;;
             ubuntu-latest)   ZIP_NAME="$ZIP_NAME-linux-x64" ;;
-            windows-latest)  ZIP_NAME="$ZIP_NAME-windows-x64" ;;
           esac
 
           cd ${{ env.DIST_DIR }}/pack
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            powershell Compress-Archive -Path * -DestinationPath "../$ZIP_NAME.zip"
-          else
-            zip -r "../$ZIP_NAME.zip" . -x "*/.DS_Store" -x "*/__MACOSX"
-          fi
+          zip -r "../$ZIP_NAME.zip" . -x "*/.DS_Store" -x "*/__MACOSX"
           cd ../..
           rm -rf ${{ env.DIST_DIR }}/pack
-
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
         shell: bash
 
