@@ -96,11 +96,7 @@ jobs:
           cp rules/rule-set-policy.md "dist/rules"
           cp LICENSE "dist"
           cp README.md "dist"
-          cd dist
-          shopt -s dotglob
-          mv * ..
-          shopt -u dotglob
-          cd ..
+          rsync -a dist/ ./
           rm -rf dist
         shell: bash
 
