@@ -19,7 +19,6 @@ env:
   VERSION: 3.0.0
   BIN_NAME: sentinel
   DIST_DIR: dist
-  PACK_DIR: pack
 
 jobs:
   build:
@@ -99,7 +98,7 @@ jobs:
           cp LICENSE "dist"
           cp README.md "dist"
 
-          ZIP_BASENAME="autumo-Sentinel-${VERSION}"
+          ZIP_BASENAME="autumo-Sentinel-${{ env.VERSION }}"
           case "${{ matrix.os }}" in
             macos-15-intel)  ZIP_BASENAME="$ZIP_BASENAME-macos-x64" ;;
             macos-latest)    ZIP_BASENAME="$ZIP_BASENAME-macos-arm64" ;;
@@ -116,7 +115,15 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sentinel-release
+          name: |
+            if: matrix.os == 'macos-15-intel'
+              autumo-Sentinel-${{ env.VERSION }}-macos-x64
+            if: matrix.os == 'macos-latest'
+              autumo-Sentinel-${{ env.VERSION }}-macos-arm64
+            if: matrix.os == 'ubuntu-latest'
+              autumo-Sentinel-${{ env.VERSION }}-linux-x64
+            if: matrix.os == 'windows-latest'
+              autumo-Sentinel-${{ env.VERSION }}-windows-x64
           path: |
             if: matrix.os == 'macos-15-intel'
               dist/autumo-Sentinel-${{ env.VERSION }}-macos-x64.zip
