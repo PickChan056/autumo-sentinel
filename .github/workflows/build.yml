@@ -80,10 +80,6 @@ jobs:
           Copy-Item -Force rules\rule-set-policy.md "dist\rules"
           Copy-Item -Force README.md dist
           Copy-Item -Force LICENSE dist
-          Set-Location dist
-          Get-ChildItem -Force | Move-Item -Destination .. -Force
-          Set-Location ..
-          Remove-Item -Recurse -Force dist
         shell: pwsh
 
       - name: Package ZIP (macOS/Linux)
@@ -96,8 +92,6 @@ jobs:
           cp rules/rule-set-policy.md "dist/rules"
           cp LICENSE "dist"
           cp README.md "dist"
-          rsync -a dist/ ./
-          rm -rf dist
         shell: bash
 
       # --------- Upload artifact ---------
@@ -105,12 +99,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ZIP_BASENAME }}
-          path: |
-            if: matrix.os == 'macos-15-intel'
-              dist/autumo-Sentinel-${{ env.VERSION }}-macos-x64.zip
-            if: matrix.os == 'macos-latest'
-              dist/autumo-Sentinel-${{ env.VERSION }}-macos-arm64.zip
-            if: matrix.os == 'ubuntu-latest'
-              dist/autumo-Sentinel-${{ env.VERSION }}-linux-x64.zip
-            if: matrix.os == 'windows-latest'
-              dist/autumo-Sentinel-${{ env.VERSION }}-windows-x64.zip
+          path: dist/*
