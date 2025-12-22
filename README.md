@@ -82,9 +82,10 @@ Detection is progressive, with each stage building on the previous one:
 
 | Scope | Types | Description |
 |-------|-------|-------------|
-| line-scoped | `keyword_combination`, `base64_suspect`, `hex_suspect`, `string_length`, `path_access` | Evaluates individual lines for suspicious keyword combinations, payloads, or sequences. Thresholds and `only_if_no_match` conditions refine triggers. |
+| line-scoped | `keyword_combination`, `base64_suspect`, `hex_suspect`, `string_length`, `path_access` | Evaluates individual lines for suspicious keyword combinations, payloads, or sequences. |
 | file-scoped | `keyword_combination`, `obfuscation_vars`, `obfuscation_strings` | Evaluates entire files for structural obfuscation, string concatenation, suspicious variable patterns, and combinations. |
 
+**Note**: Check the [heuristic engine source code](app/heuristics.py) to see what parameters each type accepts.
 
 > **Heuristic threshold**: Rules are applied in order, and the heuristic threshold determines how many indicators must match before the rule triggers. Thresholds apply only to line-scoped rules.
 
