@@ -71,7 +71,7 @@ jobs:
         shell: bash
 
       # --------- Package ZIP ---------
-      - name: Package ZIP (Windows)
+      - name: Prepare Artifact Contents (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           New-Item -ItemType Directory -Force -Path "${{ env.DIST_DIR }}\rules" | Out-Null
@@ -86,7 +86,7 @@ jobs:
           "ZIP_BASENAME=$ZIP_BASENAME" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         shell: pwsh
 
-      - name: Package ZIP (macOS/Linux)
+      - name: Prepare Artifact Contents (macOS/Linux)
         if: matrix.os != 'windows-latest'
         run: |
           mkdir -p "${{ env.DIST_DIR }}/rules"
