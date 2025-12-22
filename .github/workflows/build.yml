@@ -74,56 +74,41 @@ jobs:
       - name: Package ZIP (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          $packDir = "$env:DIST_DIR\pack"
-          New-Item -ItemType Directory -Force -Path "$packDir\rules" | Out-Null
-          Copy-Item -Recurse -Force config $packDir
-          Copy-Item -Recurse -Force patterns $packDir
-          Copy-Item -Force rules\rules.low* "$packDir\rules"
-          Copy-Item -Force rules\rule-set-policy.md "$packDir\rules"
-          Copy-Item -Force README.md $packDir
-          Copy-Item -Force LICENSE $packDir
-          Copy-Item -Force "$env:DIST_DIR\$env:BIN_NAME.exe" $packDir
+          New-Item -ItemType Directory -Force -Path "dist\rules" | Out-Null
+          Copy-Item -Recurse -Force config dist
+          Copy-Item -Recurse -Force patterns dist
+          Copy-Item -Force rules\rules.low* "dist\rules"
+          Copy-Item -Force rules\rule-set-policy.md "dist\rules"
+          Copy-Item -Force README.md dist
+          Copy-Item -Force LICENSE dist
 
-          $zipFile = "$env:DIST_DIR\autumo-Sentinel-$env:VERSION-windows-x64.zip"
-          Compress-Archive -Path "$packDir\*" -DestinationPath $zipFile -Force
-          Remove-Item -Recurse -Force $packDir
-          Write-Output "ZIP file created: $zipFile"
+          cd dist
+          $zipPath = "autumo-Sentinel-$env:VERSION-windows-x64.zip"
+          Compress-Archive * -DestinationPath $zipPath -Force
+          Write-Output "ZIP file created: $zipPath"
         shell: pwsh
 
       - name: Package ZIP (macOS/Linux)
         if: matrix.os != 'windows-latest'
         run: |
-          PACK_DIR="${DIST_DIR}/pack"
-          mkdir -p "$PACK_DIR/rules"
-          cp -r config "$PACK_DIR"
-          cp -r patterns "$PACK_DIR"
-          cp rules/rules.low* "$PACK_DIR/rules"
-          cp rules/rule-set-policy.md "$PACK_DIR/rules"
-          cp LICENSE "$PACK_DIR"
-          cp README.md "$PACK_DIR"
+          mkdir -p "dist/rules"
+          cp -r config "dist"
+          cp -r patterns "dist"
+          cp rules/rules.low* "dist/rules"
+          cp rules/rule-set-policy.md "dist/rules"
+          cp LICENSE "dist"
+          cp README.md "dist"
 
-          # Binary korrekt kopieren
-          if [[ -f "$DIST_DIR/$BIN_NAME" ]]; then
-            cp "$DIST_DIR/$BIN_NAME" "$PACK_DIR/"
-          else
-            echo "ERROR: Binary $DIST_DIR/$BIN_NAME not found!"
-            exit 1
-          fi
-
-          ZIP_NAME="autumo-Sentinel-${VERSION}"
+          ZIP_BASENAME="autumo-Sentinel-${VERSION}"
           case "${{ matrix.os }}" in
-            macos-15-intel) ZIP_NAME="$ZIP_NAME-macos-x64" ;;
-            macos-latest)    ZIP_NAME="$ZIP_NAME-macos-arm64" ;;
-            ubuntu-latest)   ZIP_NAME="$ZIP_NAME-linux-x64" ;;
+            macos-15-intel)  ZIP_BASENAME="$ZIP_BASENAME-macos-x64" ;;
+            macos-latest)    ZIP_BASENAME="$ZIP_BASENAME-macos-arm64" ;;
+            ubuntu-latest)   ZIP_BASENAME="$ZIP_BASENAME-linux-x64" ;;
           esac
 
-          ZIP_PATH="${DIST_DIR}/${ZIP_NAME}.zip"
-          mkdir -p "${DIST_DIR}"  # sicherstellen, dass dist existiert
-
-          cd "$PACK_DIR"
-          zip -r "$ZIP_PATH" . -x "*/.DS_Store" -x "*/__MACOSX"
-          cd ../..
-          rm -rf "$PACK_DIR"
+          cd dist
+          ZIP_PATH="${ZIP_NAME}.zip"
+          zip -r "$ZIP_PATH" * -x "*/.DS_Store" -x "*/__MACOSX"
           echo "ZIP file created: $ZIP_PATH"
         shell: bash
 
@@ -133,7 +118,11 @@ jobs:
         with:
           name: sentinel-release
           path: |
-            dist/autumo-Sentinel-${{ env.VERSION }}-macos-x64.zip
-            dist/autumo-Sentinel-${{ env.VERSION }}-macos-arm64.zip
-            dist/autumo-Sentinel-${{ env.VERSION }}-linux-x64.zip
-            dist/autumo-Sentinel-${{ env.VERSION }}-windows-x64.zip
+            if: matrix.os == 'macos-intel'
+              dist/autumo-Sentinel-${{ env.VERSION }}-macos-x64.zip
+            if: matrix.os == 'macos-latest'
+              dist/autumo-Sentinel-${{ env.VERSION }}-macos-arm64.zip
+            if: matrix.os == 'ubuntu-latest'
+              dist/autumo-Sentinel-${{ env.VERSION }}-linux-x64.zip
+            if: matrix.os == 'windows-latest'
+              dist/autumo-Sentinel-${{ env.VERSION }}-windows-x64.zip
