@@ -2,8 +2,6 @@ bun.sh
 bun-setup.sh
 setup_bun.sh
 install_bun.sh
-shai-hulud.sh
-hulud.sh
 bun_environment.js
 setup_bun.js
 bun_macos
