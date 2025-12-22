@@ -87,6 +87,11 @@ jobs:
           Compress-Archive * -DestinationPath $zipPath -Force
           "ZIP_BASENAME=$zipBaseName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Output "ZIP file created: $zipPath"
+
+          Set-Location dist
+          Get-ChildItem -Force | Move-Item -Destination .. -Force
+          Set-Location ..
+          Remove-Item -Recurse -Force dist
         shell: pwsh
 
       - name: Package ZIP (macOS/Linux)
@@ -113,6 +118,11 @@ jobs:
           zip -r "$ZIP_PATH" * -x "*/.DS_Store" -x "*/__MACOSX"
           echo "ZIP_BASENAME=$ZIP_BASENAME" >> $GITHUB_ENV
           echo "ZIP file created: $ZIP_PATH"
+
+          cd dist
+          mv * ..
+          cd ..
+          rm -rf dist
         shell: bash
 
       # --------- Upload artifact ---------
