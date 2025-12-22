@@ -80,14 +80,6 @@ jobs:
           Copy-Item -Force rules\rule-set-policy.md "dist\rules"
           Copy-Item -Force README.md dist
           Copy-Item -Force LICENSE dist
-
-          cd dist
-          $zipBaseName = "autumo-Sentinel-$env:VERSION-windows-x64"
-          $zipPath = "${zipBaseName}.zip"
-          Compress-Archive * -DestinationPath $zipPath -Force
-          "ZIP_BASENAME=$zipBaseName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Output "ZIP file created: $zipPath"
-
           Set-Location dist
           Get-ChildItem -Force | Move-Item -Destination .. -Force
           Set-Location ..
@@ -104,21 +96,6 @@ jobs:
           cp rules/rule-set-policy.md "dist/rules"
           cp LICENSE "dist"
           cp README.md "dist"
-
-          ZIP_BASENAME="autumo-Sentinel-${{ env.VERSION }}"
-          case "${{ matrix.os }}" in
-            macos-15-intel)  ZIP_BASENAME="$ZIP_BASENAME-macos-x64" ;;
-            macos-latest)    ZIP_BASENAME="$ZIP_BASENAME-macos-arm64" ;;
-            ubuntu-latest)   ZIP_BASENAME="$ZIP_BASENAME-linux-x64" ;;
-          esac
-          echo "ZIP base name: $ZIP_BASENAME"
-
-          cd dist
-          ZIP_PATH="${ZIP_BASENAME}.zip"
-          zip -r "$ZIP_PATH" * -x "*/.DS_Store" -x "*/__MACOSX"
-          echo "ZIP_BASENAME=$ZIP_BASENAME" >> $GITHUB_ENV
-          echo "ZIP file created: $ZIP_PATH"
-
           cd dist
           mv * ..
           cd ..
