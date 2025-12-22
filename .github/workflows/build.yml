@@ -118,7 +118,7 @@ jobs:
         with:
           name: sentinel-release
           path: |
-            if: matrix.os == 'macos-intel'
+            if: matrix.os == 'macos-15-intel'
               dist/autumo-Sentinel-${{ env.VERSION }}-macos-x64.zip
             if: matrix.os == 'macos-latest'
               dist/autumo-Sentinel-${{ env.VERSION }}-macos-arm64.zip
