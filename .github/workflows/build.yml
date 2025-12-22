@@ -57,17 +57,17 @@ jobs:
       # --------- Build sentinel CLI ---------
       - name: Build CLI (Windows)
         if: matrix.os == 'windows-latest'
-        run: pyinstaller --name ${{ env.BIN_NAME }} --onefile app/sentinel.py
+        run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --distpath ${{ env.DIST_DIR }} app/sentinel.py
         shell: pwsh
 
       - name: Build CLI (macOS ARM)
         if: matrix.os == 'macos-latest'
-        run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch arm64 app/sentinel.py
+        run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch arm64 --distpath ${{ env.DIST_DIR }} app/sentinel.py
         shell: bash
 
       - name: Build CLI (macOS Intel / Linux)
         if: matrix.os != 'windows-latest' && matrix.os != 'macos-latest'
-        run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch x86_64 app/sentinel.py
+        run: pyinstaller --name ${{ env.BIN_NAME }} --onefile --target-arch x86_64 --distpath ${{ env.DIST_DIR }} app/sentinel.py
         shell: bash
 
       # --------- Package ZIP ---------
@@ -78,9 +78,10 @@ jobs:
           New-Item -ItemType Directory -Force -Path "$packDir\rules" | Out-Null
           Copy-Item -Recurse -Force config $packDir
           Copy-Item -Recurse -Force patterns $packDir
-          Copy-Item -Force rules\rules.* "$packDir\rules"
+          Copy-Item -Force rules\rules.low* "$packDir\rules"
           Copy-Item -Force rules\rule-set-policy.md "$packDir\rules"
           Copy-Item -Force README.md $packDir
+          Copy-Item -Force LICENSE $packDir
           Copy-Item -Force "$env:DIST_DIR\$env:BIN_NAME.exe" $packDir
 
           $zipFile = "$env:DIST_DIR\autumo-Sentinel-$env:VERSION-windows-x64.zip"
@@ -96,8 +97,9 @@ jobs:
           mkdir -p "$PACK_DIR/rules"
           cp -r config "$PACK_DIR"
           cp -r patterns "$PACK_DIR"
-          cp rules/rules.* "$PACK_DIR/rules"
+          cp rules/rules.low* "$PACK_DIR/rules"
           cp rules/rule-set-policy.md "$PACK_DIR/rules"
+          cp LICENSE "$PACK_DIR"
           cp README.md "$PACK_DIR"
 
           # Binary korrekt kopieren
