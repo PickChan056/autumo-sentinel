@@ -264,10 +264,14 @@ autumo Sentinel is **dual-licensed**, with separate Open Source and Commercial e
 
 autumo Sentinel is **dual-licensed**, with separate Open Source and Commercial editions.
 
-| Edition                | License                              | Includes                                                                                       | Not included / Notes                                                                                  |
-|------------------------|-------------------------------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| Open Source Edition    | GPLv3                                | Core engine, Rule framework, Low-Severity Rules (example rules), Documentation for custom rules | Medium & High-Severity Rules, Production-ready rulesets, Advanced correlation packs                 |
-| Commercial Edition     | autumo Products General License v1.1 | Medium & High Severity Rules, Advanced heuristic combinations, Loader/Privilege/Persistence/Network+Exec rules, Advanced correlation packs, Rule updates, Optional support & integration | Suitable for CI/CD, enterprise, or security teams; Contact: [https://autumo.ch](https://autumo.ch) |
+| Edition | License | Includes | Notes |
+|---------|---------|------------------|
+| Open Source Edition | GPLv3 | Core engine, Rule framework, Low-Severity Rules (example rules), Documentation for custom rules | Rules can be extended independently |
+| Commercial Edition | autumo Products General License v1.1 | Medium & High Severity Rules, Advanced heuristic combinations, Loader/Privilege/Persistence/Network+Exec rules, Advanced correlation packs, Rule updates, Optional support & integration | Suitable for CI/CD, developer, or security teams |
+| Commercial Edition | autumo Enterprise General License v1.x | Medium- & high-severity rules, advanced heuristic combinations, loader / privilege escalation / persistence / network-execution rules, advanced correlation packages, rule updates, support & integration | Designed for CI/CD pipelines, enterprise environments, and security teamsFor product and service integrations
+| Extended | Custom License | Subject matter of a contract | For product and service integrations |
+
+Contact us at [https://autumo.ch](https://autumo.ch) for inquiries regarding commercial licenses.
 
 ### When a Commercial License is Required
 
