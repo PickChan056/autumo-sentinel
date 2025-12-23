@@ -277,7 +277,7 @@ There are different types of commercial licenses, depending on how you intend to
 
 - Use Medium or High severity rules, including occasional updates.
 
-**Autumo Enterprise Edition License:**
+**autumo Enterprise Edition License:**
 
 - Provides extended support and allows usage across the entire company (based on number of users and usage).
 
