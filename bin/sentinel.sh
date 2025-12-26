@@ -7,14 +7,14 @@
 cd "$(dirname "$0")/.." || exit 1
 
 # --- 1. Set scan directory ---
-SCAN_DIR="/Users/Mike/Development/git/repository/autumo-toolbox"
+SCAN_DIR="/Users/Mike/Development"
 
 # --- 2. Run sentinel CLI with options ---
 python3 app/sentinel.py "$SCAN_DIR" \
   -l \
   -g \
   -k \
-  --heuristics-level low \
+  --heuristics-level medium \
   # --forensic \
   # --no-bail-out \
   # --all-matches \

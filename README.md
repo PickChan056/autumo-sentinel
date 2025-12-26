@@ -85,7 +85,8 @@ Detection is progressive, with each stage building on the previous one:
 | line-scoped | `keyword_combination`, `base64_suspect`, `hex_suspect`, `string_length`, `path_access`, `obfuscation_strings` | Evaluates individual lines for suspicious keyword combinations, payloads, or sequences. |
 | file-scoped | `keyword_combination`, `obfuscation_strings`, `obfuscation_vars` | Evaluates entire files for structural obfuscation, string concatenation, suspicious variable patterns, and combinations. |
 
-**Note:** Check the [heuristic engine source code](app/heuristics.py) to see what parameters each type accepts.
+> **Rule parametrization:**  
+> Detailed descriptions of supported parameters, default values, and examples can be found in **[Rule Parameters](rules/rule-parameters.md)**.
 
 > **Rule definitions and examples:**  
 > The public repository includes a limited set of low‑severity heuristic rules for demonstration purposes.  

@@ -41,6 +41,11 @@ from typing import Union, Tuple, Dict, List, Any
 # ------------------------------------------------------------
 DEBUG_RULES_OUTPUT = False
 
+DEFAULT_LIMIT_LINE_RULE_HIT = 100
+DEFAULT_LIMIT_LINES_FILE_SCAN = 200
+DEFAULT_LIMIT_CHARS_FILE_SCAN = 20000
+DEFAULT_LIMIT_MINIFIED_LINE_AVG_LENGTH = 200
+
 # ------------------------------------------------------------
 # Data Classes
 # ------------------------------------------------------------
@@ -65,25 +70,36 @@ class HeuristicRule:
     source_file: Path | None = None
     engine: HeuristicEngine | None = None
 
+    # Reset states; a rule is stateful!
+    sum_lines: int = 0
+    sum_chars: int = 0
     matched_lines: List[str] = field(default_factory=list)
-    bailout = False
+    bailout: bool = False
+    minified: bool = False
     
     def matches(self, data: Union[str, List[str]], ext: str) -> Tuple[bool, str]:
         # Reset matched lines
         self.matched_lines = []
+        self.sum_lines = 0
+        self.sum_chars = 0
+        self.bailout = False
+        self.minified = False
 
         if self.scope == "line":
             return self.engine.check_line(self, line=data, ext=ext)
         elif self.scope == "file":
             return self.engine.check_file(self, lines=data, ext=ext)
         
-        return False, None
+        self.die(f"Scope {self.scope} is invalid, check rule id {self.id}")
 
     def get_matched_lines(self) -> List[str]:
         return self.matched_lines or []
     
     def has_bailout(self) -> bool:
         return self.bailout
+
+    def is_minified(self) -> bool:
+        return self.minified
 
 # ------------------------------------------------------------
 # Heuristic Engine
@@ -92,14 +108,23 @@ class HeuristicEngine:
     """
     Executes heuristic checks based on JSON rules.
     Initialized only when -k / heuristics option is enabled.
+    Heuristic Rules are stateful; reset states after using an instance!
     """
 
     def __init__(self, base_config: Dict[str, Any], config: Dict[str, Any], no_bail_out: bool, log=None) -> None:
         self.debug_mode = base_config.get("debug_mode", False)
-        self.max_line_rule_hit_length = base_config["limits"].get("max_line_rule_hit_length", 100)
-        self.max_lines_file_scan = base_config["limits"].get("max_lines_file_scan", 200)
-        self.max_chars_file_scan = base_config["limits"].get("max_chars_file_scan", 20000)
+        self.max_line_rule_hit_length = base_config["limits"].get("max_line_rule_hit_length", DEFAULT_LIMIT_LINE_RULE_HIT)
+        self.max_lines_file_scan = base_config["limits"].get("max_lines_file_scan", DEFAULT_LIMIT_LINES_FILE_SCAN)
+        self.max_chars_file_scan = base_config["limits"].get("max_chars_file_scan", DEFAULT_LIMIT_CHARS_FILE_SCAN)
+        self.max_minified_line_avg_length = base_config["limits"].get("max_minified_line_avg_length", DEFAULT_LIMIT_MINIFIED_LINE_AVG_LENGTH)
         self.extensions = base_config["artifacts"]["extensions"]
+
+        minified_ext_group_keys = ["javascript", "typescript"]
+        self.js_ts_extensions = [
+            ext
+            for key in minified_ext_group_keys
+            for ext in self.extensions.get(key, [])
+        ]
 
         self.rules: List[HeuristicRule] = []
         self.no_bail_out = no_bail_out
@@ -177,13 +202,34 @@ class HeuristicEngine:
             self.die(f"Unknown executor type '{rule.type}' in rule '{rule.id}'\n")
             return False, None
 
+        sev = rule.severity.lower()
+
         # Merge lines into a single string for file-based checks
         if isinstance(lines, list):
-            big_line = "\n".join(lines)
+            if rule.type == "keyword_combination":
+                # Check for minified
+                if ext in self.js_ts_extensions and 1 <= len(lines) <= 2:
+                    avg_len = sum(len(l) for l in lines) / len(lines)
+                    if avg_len > self.max_minified_line_avg_length:
+                        rule.minified = True
+                # Iterate lines
+                for l in lines:
+                    try:
+                        # Still mark it as 'file', even we process line per line
+                        executor(rule, line=l, ext=ext, scope="file")
+                    except BailoutException:
+                        return True, sev
+                if len(rule.matched_lines) > 0:
+                    return True, sev
+                else:
+                    return False, sev
+                
+            else:
+                big_line = "\n".join(lines)
+                return executor(rule, line=big_line, ext=ext, scope="file"), sev
         else:
             big_line = lines
-
-        return executor(rule, line=big_line, ext=ext, scope="file"), rule.severity.lower()
+            return executor(rule, line=big_line, ext=ext, scope="file"), sev
 
     # ------------------------------------------------------------
     # Rule loading
@@ -269,7 +315,8 @@ class HeuristicEngine:
             else:
                 # unknown prefix or misconfiguration → log
                 if self.log:
-                    self.log.write(f"Warning: Rule '{rule.id}': unknown extension/group '{e}'")
+                    self.log.write(f"Error: Rule '{rule.id}': unknown extension/group '{e}'")
+                self.die(f"Rule '{rule.id}': unknown extension/group '{e}'")
         
         return ext in resolved_exts
 
@@ -316,8 +363,8 @@ class HeuristicEngine:
     def _check_string_length(self, rule: HeuristicRule, *, line: str, ext: str, scope: str) -> bool:
         if (scope != "line"):
             if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': string_length executor only works in 'line' scope\n")
-            return False
+                self.log.write(f"Error: Rule '{rule.id}': string_length executor only works in 'line' scope\n")
+            self.die(f"Rule '{rule.id}': string_length executor only works in 'line' scope")
 
         min_len = rule.parameters.get("min_length", 0)
         return len(line) >= min_len
@@ -325,8 +372,8 @@ class HeuristicEngine:
     def _check_base64(self, rule: HeuristicRule, *, line: str, ext: str, scope: str) -> bool:
         if (scope != "line"):
             if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': base64_suspect executor only works in 'line' scope\n")
-            return False
+                self.log.write(f"Error: Rule '{rule.id}': base64_suspect executor only works in 'line' scope\n")
+            self.die(f"Rule '{rule.id}': base64_suspect executor only works in 'line' scope")
         
         min_len = rule.parameters.get("min_length", 0)
         if len(line) < min_len:
@@ -336,8 +383,8 @@ class HeuristicEngine:
     def _check_hex(self, rule: HeuristicRule, *, line: str, ext: str, scope: str) -> bool:
         if (scope != "line"):
             if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': hex_suspect executor only works in 'line' scope\n")
-            return False
+                self.log.write(f"Error: Rule '{rule.id}': hex_suspect executor only works in 'line' scope\n")
+            self.die(f"Rule '{rule.id}': hex_suspect executor only works in 'line' scope")
 
         min_len = rule.parameters.get("min_length", 0)
         if len(line) < min_len:
@@ -347,8 +394,8 @@ class HeuristicEngine:
     def _check_paths(self, rule: HeuristicRule, *, line: str, ext: str, scope: str) -> bool:
         if (scope != "line"):
             if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': path_access executor only works in 'line' scope\n")
-            return False
+                self.log.write(f"Error: Rule '{rule.id}': path_access executor only works in 'line' scope\n")
+            self.die(f"Rule '{rule.id}': path_access executor only works in 'line' scope")
 
         paths = rule.parameters.get("paths", [])
         return any(p in line for p in paths)
@@ -435,11 +482,6 @@ class HeuristicEngine:
         - Logs warnings for configuration inconsistencies.
         """
 
-        if (scope != "line" and scope != "file"):
-            if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': keyword_combination executor only works in 'line' or 'file' scope\n")
-            return False
-
         # Convert line to lowercase for case-insensitive matching
         line_lc = line.lower()
 
@@ -521,24 +563,20 @@ class HeuristicEngine:
                     )
                 thresholds = [1] * amount
 
-        sum_lines = 0
-        sum_chars = 0
-
         # --- Collect matched lines for line- and file-scope rules ---
         def collect_matched_line(line: str) -> None:
-            nonlocal sum_lines, sum_chars
             if len(line) > self.max_line_rule_hit_length:
                 line = line[:self.max_line_rule_hit_length] + " [truncated]"
             if scope == "file":
                 if line not in rule.matched_lines:
                     rule.matched_lines.append(line)
                     if not self.no_bail_out:
-                        sum_lines += 1
-                        sum_chars += len(line)
-                        if sum_lines >= self.max_lines_file_scan:
+                        rule.sum_lines += 1
+                        rule.sum_chars += len(line)
+                        if rule.sum_lines >= self.max_lines_file_scan:
                             rule.bailout = True
                             raise BailoutException()
-                        if sum_chars >= self.max_chars_file_scan:
+                        if rule.sum_chars >= self.max_chars_file_scan:
                             rule.bailout = True
                             raise BailoutException()
             else:
@@ -589,7 +627,7 @@ class HeuristicEngine:
             return check_combination(0)
     
         except BailoutException:
-            return True
+            raise
 
     #
     # Example:
@@ -628,11 +666,6 @@ class HeuristicEngine:
         Returns:
             bool: True if the aggregated score exceeds the configured threshold.
         """
-
-        if (scope != "line" and scope != "file"):
-            if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': obfuscation_strings executor only works in 'line' or 'file' scope\n")
-            return False
 
         params = rule.parameters or {}
 
@@ -739,8 +772,8 @@ class HeuristicEngine:
 
         if (scope != "file"):
             if self.log:
-                self.log.write(f"Warning: Rule '{rule.id}': obfuscation_vars executor only works in 'file' scope\n")
-            return False
+                self.log.write(f"Error: Rule '{rule.id}': obfuscation_vars executor only works in 'file' scope\n")
+            self.die(f"Rule '{rule.id}': obfuscation_vars executor only works in 'file' scope")
 
         # --- Load rule parameters with defaults ---
         p = rule.parameters or {}

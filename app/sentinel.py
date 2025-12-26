@@ -52,6 +52,9 @@ from build_info import COMMERCIAL_BUILD, VERSION
 CSV_BATCH_SIZE = 500
 DEFAULT_LIMIT_LINE = 200
 DEFAULT_LIMIT_LINE_RULE_HIT = 100
+DEFAULT_LIMIT_PREVIEW_LINES_FILE = 10
+DEFAULT_LIMIT_LINES_FILE_SCAN = 200
+DEFAULT_LIMIT_CHARS_FILE_SCAN = 20000
 
 SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
 SCOPE_ORDER = {"line": 0, "file": 1}
@@ -348,8 +351,8 @@ class DevScanner:
         self.debug_mode = self.config.get("debug_mode", False)
 
         # Bail-out limits
-        self.max_lines_file_scan = self.config["limits"].get("max_lines_file_scan", 200)
-        self.max_chars_file_scan = self.config["limits"].get("max_chars_file_scan", 20000)
+        self.max_lines_file_scan = self.config["limits"].get("max_lines_file_scan", DEFAULT_LIMIT_LINES_FILE_SCAN)
+        self.max_chars_file_scan = self.config["limits"].get("max_chars_file_scan", DEFAULT_LIMIT_CHARS_FILE_SCAN)
 
         # Load extensions for comment stripping
         self.block_comment_extensions = [
@@ -393,6 +396,7 @@ class DevScanner:
 
         self.max_line_length = self.config["limits"].get("max_line_length", DEFAULT_LIMIT_LINE)
         self.max_line_rule_hit_length = self.config["limits"].get("max_line_rule_hit_length", DEFAULT_LIMIT_LINE_RULE_HIT)
+        self.max_preview_lines_file = self.config["limits"].get("max_preview_lines_file", DEFAULT_LIMIT_PREVIEW_LINES_FILE)
 
         # Patterns
         self.patterns_files = load_patterns(Path(self.config["patterns"]["files"]))
@@ -815,10 +819,6 @@ class DevScanner:
         total_files_in_dir = self.count_relevant_files(path)
         processed_files = 0
 
-        # Bail-out vaiables
-        sum_chars = 0
-        sum_lines = 0
-
         fhc: FileHeuristicContext | None = None
 
         for dirpath, _, filenames in os.walk(path):
@@ -830,6 +830,10 @@ class DevScanner:
                 file_path = safe_realpath(Path(dirpath) / fname)
                 if not isinstance(file_path, Path):
                     file_path = Path(file_path)
+
+                # Bail-out vaiables
+                sum_chars = 0
+                sum_lines = 0
 
                 # Note: file_path.suffix -> ".gz", file_path.suffixes -> [".tar", ".gz"]
                 ext = file_path.suffix.lower()
@@ -854,9 +858,7 @@ class DevScanner:
                             lines = f.readlines()
                     except UnicodeDecodeError:
                         # Fallback to Latin-1
-                        if self.log:
-                            self.log.write(f"WARNING: fallback to Latin-1 encoding for {file_path}.\n")
-                        with file_path.open("r", encoding="latin-1") as f:
+                        with file_path.open("r", encoding="latin-1", errors="replace") as f:
                             lines = f.readlines()
 
                     if self.heuristics_enabled:
@@ -994,22 +996,34 @@ class DevScanner:
                                 file_rule_name = "[heuristic file match]: " + rule.name
                                 matched_lines = rule.get_matched_lines()
                                 combined_lines = ""
+                                line_hits = len(matched_lines) if matched_lines else 1
 
                                 if matched_lines:
-                                    line_hits = 0
-                                    if len(matched_lines) > 1:
-                                        for line in matched_lines:
-                                            line = line.replace("\n", " ").replace("\r", " ").strip()
-                                            if len(line) > self.max_line_rule_hit_length:
-                                                line = line[:self.max_line_rule_hit_length] + " [truncated]"
-                                            combined_lines += line + "\n"
-                                            line_hits += 1
-                                    else:
+                                    # --- Build preview lines with truncation ---
+                                    lines_to_preview = []
+                                    for line in matched_lines:
+                                        if len(lines_to_preview) >= self.max_preview_lines_file:
+                                            break
+                                        line_preview = line.replace("\n", " ").replace("\r", " ").strip()
+                                        if len(line_preview) > self.max_line_rule_hit_length:
+                                            line_preview = line_preview[:self.max_line_rule_hit_length] + " [truncated]"
+                                        lines_to_preview.append(line_preview)
+
+                                    combined_lines = "\n".join(lines_to_preview)
+
+                                    # --- Special handling for JS/TS minified files ---
+                                    if rule.minified:
                                         combined_lines = "[File content omitted – likely contains bundled or minified code]"
-                                        line_hits = 1
+                                    # --- Regular previews ---
+                                    elif len(matched_lines) > self.max_preview_lines_file:
+                                        combined_lines = f"Preview of matched lines (max. {self.max_preview_lines_file}):\n" + combined_lines
+                                    elif len(matched_lines) > 1:
+                                        combined_lines = "Matched lines:\n" + combined_lines
+                                    # 1 line = pass
+
                                 else:
-                                    combined_lines = "[File – content omitted]"
-                                    line_hits = 1
+                                    combined_lines = "[File content omitted]"
+
                                 self.record_hit(file_path, line_hits, file_rule_name, severity, rule.id, rule.type, 0, combined_lines, limit_line=False, remove_line_feed=False)
                                 hits += 1
 

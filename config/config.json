@@ -10,7 +10,9 @@
     "max_line_length": 100,
     "max_line_rule_hit_length": 100,
     "max_lines_file_scan": 200,
-    "max_chars_file_scan": 20000
+    "max_chars_file_scan": 20000,
+    "max_preview_lines_file": 10,
+    "max_minified_line_avg_length": 200    
   },
   
   "patterns": {
