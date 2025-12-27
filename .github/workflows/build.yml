@@ -116,12 +116,19 @@ jobs:
           echo "ZIP_BASENAME=$ZIP_BASENAME" >> $GITHUB_ENV
 
       # --------- ZIP artifact ---------
-      - name: ZIP release
+      - name: Zip release (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         shell: bash
         run: |
           cd release
           zip -r "${ZIP_BASENAME}.zip" "$ZIP_BASENAME"
           cd ..
+
+      - name: Zip release (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "release/${env:ZIP_BASENAME}" -DestinationPath "release/${env:ZIP_BASENAME}.zip"
 
       # --------- Upload artifact ---------
       - name: Upload artifact
