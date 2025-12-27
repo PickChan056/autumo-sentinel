@@ -444,7 +444,7 @@ class DevScanner:
         self.safety_config = self.config["safety"]
 
         # Initialize CSV
-        self.csv_file.write_text("file;hits;pattern_or_rule;rule_id;rule_type;type_or_severity;line_number;line\n", encoding="utf-8")
+        self.csv_file.write_text("file;hits;pattern_or_rule;type_or_severity;rule_id;rule_type;line_number;line\n", encoding="utf-8")
 
         # Setup
         self.print_setup()
