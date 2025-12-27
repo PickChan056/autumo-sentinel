@@ -54,9 +54,9 @@ Detection is progressive, with each stage building on the previous one:
 
 | Stage | Scope                | Purpose                                                                 |
 |-------|--------------------|-------------------------------------------------------------------------|
-| 1     | Filenames           | Hygiene check: identify unusual or suspicious filenames in the project directory. |
-| 2     | Project + caches    | Pattern scanning: detect suspicious content using plain and regex patterns; surfaces raw indicators. |
-| 3     | Line + file         | Heuristic rules: combine evidence from filenames, patterns, and previous heuristic hits; thresholds refine triggers. |
+| 1     | Filenames          | Hygiene check: identify unusual or suspicious filenames in the project directory. |
+| 2     | Patterns           | Pattern scanning: detect suspicious content using plain and regex patterns; surfaces raw indicators. |
+| 3     | Heuristic patterns | Heuristic rules: combine evidence from filenames, patterns, and previous heuristic hits; thresholds refine triggers. |
 
 > This staged architecture ensures a clear separation of scopes and rule types while enabling robust, multi-stage malware detection.
 
