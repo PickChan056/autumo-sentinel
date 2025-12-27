@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# ------------------------------------------------------------------------------
+#
+# autumo Sentinel – Multi-Stage Supply-Chain Malware Scanner & Code Forensics
+# Version 3.0.0 | Copyright (c) 2025 autumo GmbH
+#
+# DESCRIPTION:
+#   Emojis. 
+#
+# LICENSE:
+#   SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-commercial
+#   Dual license: GPL-3.0 (https://www.gnu.org/licenses/gpl-3.0.en.html)
+#                 or commercial (contact autumo GmbH)
+#
+# ------------------------------------------------------------------------------
+
+
+import platform
+
+SYSTEM = platform.system()
+
+# Symbol definitions per platform
+if SYSTEM == "Darwin":
+    # macOS: real emojis
+    SCAN = "🔍"
+    GLOBAL = "🌍"
+    SUCCESS = "✅"
+    ERROR = "❌"
+    WARNING = "⚠️ "
+    INFO = "ℹ️ "
+    ALIEN = "👾"
+    LIGHTNING = "⚡️"
+else:
+    # Windows and Linux: only safe ASCII/Unicode characters
+    SCAN = ">"
+    GLOBAL = "o"
+    SUCCESS = "v"
+    ERROR = "x"
+    WARNING = "!"
+    INFO = "i"
+    ALIEN = ""
+    LIGHTNING = ""
+
+# Functions
+def scan() -> str:
+    return SCAN
+
+def glob() -> str:
+    return GLOBAL
+
+def ok() -> str:
+    return SUCCESS
+
+def err() -> str:
+    return ERROR
+
+def warn() -> str:
+    return WARNING
+
+def info() -> str:
+    return INFO
+
+def alien() -> str:
+    return ALIEN
+
+def lightning() -> str:
+    return LIGHTNING
