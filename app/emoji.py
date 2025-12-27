@@ -30,16 +30,22 @@ if SYSTEM == "Darwin":
     ERROR = "❌"
     WARNING = "⚠️ "
     INFO = "ℹ️ "
+    DISK = "💾"
+    ORDER = "🔢"
+    ENGINE = "📜"
     ALIEN = "👾"
     LIGHTNING = "⚡️"
 else:
     # Windows and Linux: only safe ASCII/Unicode characters
-    SCAN = ">"
-    GLOBAL = "o"
-    SUCCESS = "v"
+    SCAN = ""
+    GLOBAL = ""
+    SUCCESS = "√"
     ERROR = "x"
     WARNING = "!"
     INFO = "i"
+    DISK = ""
+    ORDER = ""
+    ENGINE = ""
     ALIEN = ""
     LIGHTNING = ""
 
@@ -61,6 +67,15 @@ def warn() -> str:
 
 def info() -> str:
     return INFO
+
+def disk() -> str:
+    return DISK
+
+def order() -> str:
+    return ORDER
+
+def engine() -> str:
+    return ENGINE
 
 def alien() -> str:
     return ALIEN

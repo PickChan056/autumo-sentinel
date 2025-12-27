@@ -43,6 +43,7 @@ from typing import List, Dict, Tuple
 from collections import defaultdict
 from dataclasses import dataclass, field
 
+import emoji as e
 from heuristics import HeuristicEngine
 from build_info import COMMERCIAL_BUILD, VERSION
 

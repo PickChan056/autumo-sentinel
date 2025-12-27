@@ -36,6 +36,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union, Tuple, Dict, List, Any
 
+import emoji as e
+
 # ------------------------------------------------------------
 # Constants
 # ------------------------------------------------------------
