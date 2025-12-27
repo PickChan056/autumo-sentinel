@@ -162,7 +162,7 @@ jobs:
           name: autumo Sentinel v${{ env.VERSION }}
           draft: true
           prerelease: false
-          files: artifacts/*.zip
+          files: artifacts/*/*.zip
           body: |
             ## autumo Sentinel v${{ env.VERSION }}
 
