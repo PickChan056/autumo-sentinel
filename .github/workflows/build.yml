@@ -68,7 +68,7 @@ jobs:
         run:
           pyinstaller --name ${{ env.BIN_NAME }} \
             --onefile --icon "app/resources/icon.icns" \
-            --target-arch arm64  \
+            --target-architecture arm64  \
             --distpath ${{ env.DIST_DIR }} app/${{ env.BIN_NAME }}.py
 
       - name: Build CLI (macOS Intel)
@@ -86,7 +86,6 @@ jobs:
         run:
           pyinstaller --name ${{ env.BIN_NAME }} \
             --onefile --icon "app/resources/icon.png" \
-            --target-arch x86_64 \
             --distpath ${{ env.DIST_DIR }} app/${{ env.BIN_NAME }}.py
 
       # --------- Prepare Artifact Contents ---------
