@@ -209,18 +209,21 @@ OPTIONS:
           - high    high severity only
 
   --no-bail-out
-        Disable bail-out limits.
-        Processes entire files without line or character limits.
-        May significantly increase scan time.
+        Prevents early termination when a finding is detected.
+        The scanner continues analyzing the full file, but reports
+        only the first match per rule.
+        Use '--all-matches' to collect multiple findings per file.
 
   --all-matches
-        Evaluate all heuristic rules.
-        Ignores rules marked with 'only_if_no_match'.
+        Report all matches per rule and file instead of stopping after the
+        first finding. May increase scan time and output size.
+        Note: Rules marked as 'only_if_no_match' are ignored when this
+        option is enabled.
 
   --forensic
-        Enable forensic mode.
+        Enable forensic mode for exhaustive analysis and reporting.
         Equivalent to:
-          --no-bail-out + --all-matches
+          '--no-bail-out' + '--all-matches'
 
   --exclude-dirs <dir1,dir2,...>
         Comma-separated list of directory names to exclude
