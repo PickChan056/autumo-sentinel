@@ -279,7 +279,7 @@ def print_header(
         if not COMMERCIAL_BUILD
         else (
             "Commercial / Full Version - \n"
-            "          autumo Products General License v1.0"
+            "           autumo Products General License v1.0"
         )
     )
     
