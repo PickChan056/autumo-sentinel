@@ -5,7 +5,7 @@
 # Dual license: GPL-3.0 (https://www.gnu.org/licenses/gpl-3.0.en.html)
 # ------------------------------------------------------------------------------
 
-name: Build autumo Sentinel Releases (OSS)
+name: Build autumo Sentinel Releases (Commercial)
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
         default: 'master'
 
 env:
-  VERSION: 3.0.0
+  VERSION: 3.0.0c
   PYTHON_VERSION: 3.12.0
   DIST_DIR: dist
   BIN_NAME: sentinel
@@ -54,6 +54,27 @@ jobs:
         shell: bash
         run: rm -rf ${{ env.DIST_DIR }} build ${{ env.BIN_NAME }}.spec
 
+      # -------- Patch (macOS/Linux)
+      - name: Patch source
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          sed -i.bak \
+            -e 's/^COMMERCIAL_BUILD = False$/COMMERCIAL_BUILD = True/' \
+            -e 's/^VERSION = "3.0.0"$/VERSION = "3.0.0c"/' \
+            app/build_info.py
+
+      # -------- Patch (Windows)
+      - name: Patch source (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Copy-Item app/build_info.py app/build_info.py.bak
+          (Get-Content app/build_info.py) `
+            -replace '^COMMERCIAL_BUILD = False$', 'COMMERCIAL_BUILD = True' `
+            -replace '^VERSION = "3.0.0"$', 'VERSION = "3.0.0c"' |
+          Set-Content app/build_info.py
+
       # --------- Build sentinel CLI ---------
       - name: Build CLI (Windows)
         if: matrix.os == 'windows-latest'
@@ -88,6 +109,14 @@ jobs:
           pyinstaller --name ${{ env.BIN_NAME }} \
             --onefile --icon "app/resources/icon.png" \
             --distpath ${{ env.DIST_DIR }} app/${{ env.BIN_NAME }}.py
+
+      # -------- Restore Source
+      - name: Restore source
+        shell: bash
+        run: |
+          if [ -f app/build_info.py.bak ]; then
+            mv app/build_info.py.bak app/build_info.py
+          fi
 
       # --------- Prepare Artifact Contents ---------
       - name: Prepare Artifact Contents
@@ -138,43 +167,3 @@ jobs:
           name: ${{ env.ZIP_BASENAME }}
           path: release/${{ env.ZIP_BASENAME }}.zip
           # Without ZIP -> path: release/*
-
-  release:
-    name: Create Draft Release
-    needs: build
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Show downloaded artifacts
-        run: ls -R artifacts
-
-      - name: Create Draft GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ env.VERSION }}
-          name: autumo Sentinel v${{ env.VERSION }}
-          draft: true
-          prerelease: false
-          files: artifacts/*/*.zip
-          body: |
-            ## autumo Sentinel v${{ env.VERSION }}
-
-            **Multi‑Stage Supply‑Chain Malware Scanner & Code Forensics Engine**
-
-            Included platforms:
-            - macOS (Intel & ARM)
-            - Linux x64
-            - Windows x64
-
-            > Draft release – not published
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
