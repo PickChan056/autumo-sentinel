@@ -36,9 +36,9 @@ The following chart provides an overview of **autumo Sentinel v3.0** across 12 r
 ![autumo Sentinel Hits vs Duration](app/resources/performance.png)
 **Note:** Reported findings vary by scan mode. Sentinel intentionally separates analysis depth from finding count. Lower numbers do not mean lower detection quality.
 
-> **Scan depth:** controlled by `--no-bail-out`
-> **Reported findings:** controlled by `--all-matches`
-> **Rule precision:** controlled by `--heuristics-level`
+> **Scan depth:** controlled by `--no-bail-out`  
+> **Reported findings:** controlled by `--all-matches`  
+> **Rule precision:** controlled by `--heuristics-level`  
 
 Each point represents a single run:
 - **Labels**:
