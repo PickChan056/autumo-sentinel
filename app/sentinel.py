@@ -1126,6 +1126,7 @@ class DevScanner:
                 self.log.write(f"- Bail-out disabled (no line/file limits)\n")
             if self.all_matches:
                 print("- All-matches mode enabled (ignore only_if_no_match)")
+                self.log.write(f"- All-matches mode enabled (ignore only_if_no_match)\n")
 
         if self.exclude_dirs:
             print(f"- Excluded directories: {', '.join(self.exclude_dirs)}")
