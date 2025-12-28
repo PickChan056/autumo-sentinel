@@ -125,10 +125,10 @@ jobs:
           mkdir -p "${{ env.DIST_DIR }}/rules"
           cp -r config "${{ env.DIST_DIR }}"
           cp -r patterns "${{ env.DIST_DIR }}"
-          cp rules/rule*.md "${{ env.DIST_DIR }}/rules"
+          cp rules/rule* "${{ env.DIST_DIR }}/rules"
           cp README.md "${{ env.DIST_DIR }}"
           cp LICENSE "${{ env.DIST_DIR }}"
-          cp LICENSE_COMMERCIAL.html "${{ env.DIST_DIR }}"
+          cp .github/resources/LICENSE_COMMERCIAL.html "${{ env.DIST_DIR }}"
 
           ZIP_BASENAME="autumo-Sentinel-${{ env.VERSION }}"
           case "${{ matrix.os }}" in
